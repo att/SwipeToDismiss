@@ -1,0 +1,19 @@
+# Source files (we ship compiled dist)
+src/
+
+# Config files
+tsconfig.json
+.eslintrc
+.prettierrc
+
+# Development
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Example app
+example/
+README_EXAMPLE_SETUP.md
+*.log

@@ -2,7 +2,12 @@ import { StyleProp, ViewStyle } from 'react-native';
 
 export interface SwipeToDismissProps {
   onRemove: () => void;
+  resetThresholdArg?: number;
   dismissThresholdArg?: number;
-  deleteButtonThresholdArg?: number;
-  deleteContainerCustomStyles?: StyleProp<ViewStyle>;
+  dismissContainerCustomStyles?: StyleProp<ViewStyle>;
+}
+export interface UsePanGestureProps {
+  onRemove: () => void;
+  resetThresholdArg: number;
+  dismissThresholdArg: number;
 }

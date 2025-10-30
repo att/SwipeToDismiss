@@ -1,25 +1,81 @@
 {
   "name": "swipe-to-dismiss",
   "version": "1.0.0",
+  "description": "A React Native component that allows dismissing content with swipe or tap gestures, built with gesture-handler and reanimated",
   "main": "dist/index.js",
+  "module": "dist/index.js",
+  "react-native": "dist/index.js",
   "types": "dist/index.d.ts",
+  "source": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "react-native": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "build": "tsc --project tsconfig.json"
+    "build": "tsc --project tsconfig.json",
+    "prepare": "npm run build",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "react-native",
+    "swipe",
+    "tap",
+    "dismiss",
+    "gesture",
+    "component",
+    "react-native-gesture-handler",
+    "react-native-reanimated",
+    "swipe-to-delete",
+    "card",
+    "animation",
+    "ios",
+    "android"
+  ],
+  "author": {
+    "name": "Bar Shaya",
+    "url": "https://github.com/barshaya-att"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/att/SwipeToDismiss.git"
+  },
+  "bugs": {
+    "url": "https://github.com/att/SwipeToDismiss/issues"
+  },
+  "homepage": "https://github.com/att/SwipeToDismiss#readme",
+  "engines": {
+    "node": ">=14.0.0"
   },
   "peerDependencies": {
-    "@react-navigation/core": "^6.4.17",
-    "react": "18.2.0",
-    "react-native": "0.72.0",
-    "react-native-gesture-handler": "~2.12.0",
-    "react-native-reanimated": "~3.3.0",
-    "react-native-safe-area-context": "4.6.3",
-    "react-native-screens": "~3.22.0",
-    "react-native-svg": "^15.12.0"
+    "react": ">=16.8.0",
+    "react-native": ">=0.60.0",
+    "react-native-gesture-handler": ">=2.0.0",
+    "react-native-reanimated": ">=3.0.0",
+    "react-native-svg": ">=13.4.0"
+  },
+  "peerDependenciesMeta": {
+    "react-native-svg": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@types/react": "~18.2.14",
+    "@types/react-native": "^0.72.0",
     "typescript": "^5.9.2"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "private": false
 }

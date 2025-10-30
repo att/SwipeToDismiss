@@ -1,10 +1,2 @@
-import { BorderRadius, Spacing } from '@myatt/ui-library';
-
-export const DISMISS_TRANSLATION_BREAKPOINT = 0.5;
-export const DELETE_BUTTON_THRESHOLD = 0.2;
-
-export const deleteContainerDefault = {
-  marginHorizontal: Spacing.M,
-  marginVertical: Spacing.M,
-  borderRadius: BorderRadius.L,
-};
+export const RESET_THRESHOLD = 0.15; // 15% - below this, card returns
+export const DISMISS_THRESHOLD = 0.6; // 40% - above this, card dismisses

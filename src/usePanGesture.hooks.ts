@@ -1,73 +1,72 @@
-import { useCallback } from 'react';
-import { Gesture, GestureStateChangeEvent, GestureUpdateEvent, PanGestureHandlerEventPayload } from 'react-native-gesture-handler';
+import { Gesture } from 'react-native-gesture-handler';
 import { Easing, runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
+import { UsePanGestureProps } from './swipeToDismiss.types';
 
-export const usePanGesture = (onRemove: () => void, dismissThresholdArg: number, deleteButtonThresholdArg: number) => {
+export const usePanGesture = ({
+  onRemove,
+  resetThresholdArg,
+  dismissThresholdArg,
+}: UsePanGestureProps) => {
   const initialTranslateX = useSharedValue(0);
   const currentTranslateX = useSharedValue(0);
-  const translateDeleteButtonX = useSharedValue(0);
+  const translateDismissButtonX = useSharedValue(0);
   const itemHeight = useSharedValue(0);
   const itemWidth = useSharedValue(0);
-  const deleteButtonThreshold = useSharedValue(0);
-  const backgroundColor = useSharedValue('transparent');
+  const dismissButtonThreshold = useSharedValue(0);
   const efficientOutApp = Easing.bezier(0.2, 0.1, 0.0, 1.0);
 
-  const handleOnStart = useCallback(() => {
+  const handleOnStart = () => {
+    console.log("start")
     initialTranslateX.value = currentTranslateX.value;
-    deleteButtonThreshold.value = -itemWidth.value * deleteButtonThresholdArg;
-  }, [initialTranslateX, currentTranslateX]);
+    console.log(itemWidth.value);
+    dismissButtonThreshold.value = -itemWidth.value * dismissThresholdArg;
+  };
 
-  const handleOnUpdate = useCallback(
-    (event: GestureUpdateEvent<PanGestureHandlerEventPayload>) => {
-      const isSwipingLeft = event.translationX + initialTranslateX.value <= 0;
+  const handleOnUpdate = (event: any) => {
+    const isSwipingLeft = event.translationX + initialTranslateX.value <= 0;
+    if (isSwipingLeft) {
+      currentTranslateX.value = event.translationX + initialTranslateX.value;
+    }
+  };
 
-      if (isSwipingLeft) {
-        currentTranslateX.value = event.translationX + initialTranslateX.value;
-      }
-    },
-    [initialTranslateX, currentTranslateX],
-  );
-
-  const resetPosition = useCallback(() => {
-    backgroundColor.value = 'transparent';
+  const resetPosition = () => {
     currentTranslateX.value = withTiming(0, { easing: Easing.inOut(Easing.ease) });
-  }, [currentTranslateX]);
+  };
 
-  const snapToDeleteButton = useCallback(
-    (deleteButtonThreshold: number) => {
-      currentTranslateX.value = withTiming(deleteButtonThreshold, { easing: Easing.inOut(Easing.ease) });
-      initialTranslateX.value = deleteButtonThreshold;
-    },
-    [currentTranslateX],
-  );
-
-  const dismissItem = useCallback(() => {
-    currentTranslateX.value = withTiming(-itemWidth.value, { easing: efficientOutApp }, () => {
-      translateDeleteButtonX.value = withTiming(-itemWidth.value, { easing: efficientOutApp }, () => {
-        itemHeight.value = withTiming(0, { easing: efficientOutApp }, finished => {
-          if (finished) {
-            runOnJS(onRemove)();
-          }
-        });
-      });
+  const snapToDismissButton = (dismissButtonThreshold: number) => {
+    currentTranslateX.value = withTiming(dismissButtonThreshold, {
+      easing: Easing.inOut(Easing.ease),
     });
-  }, [itemWidth, currentTranslateX, translateDeleteButtonX, itemHeight, onRemove]);
+    initialTranslateX.value = dismissButtonThreshold;
+  };
 
-  const handleOnEnd = useCallback(
-    (event: GestureStateChangeEvent<PanGestureHandlerEventPayload>) => {
-      const currentTranslateXValue = event.translationX + initialTranslateX.value;
-      const dismissThreshold = -itemWidth.value * dismissThresholdArg;
+  const dismissItem = () => {
+    currentTranslateX.value = withTiming(-itemWidth.value, { easing: efficientOutApp }, () => {
+      translateDismissButtonX.value = withTiming(
+        -itemWidth.value,
+        { easing: efficientOutApp },
+        () => {
+          itemHeight.value = withTiming(0, { easing: efficientOutApp }, (finished: boolean) => {
+            if (finished) {
+              runOnJS(onRemove)();
+            }
+          });
+        }
+      );
+    });
+  };
 
-      if (currentTranslateXValue > deleteButtonThreshold.value / 2) {
-        resetPosition();
-      } else if (currentTranslateXValue > dismissThreshold) {
-        snapToDeleteButton(deleteButtonThreshold.value);
-      } else {
-        dismissItem();
-      }
-    },
-    [initialTranslateX, itemWidth, resetPosition, snapToDeleteButton, dismissItem],
-  );
+  const handleOnEnd = (event: any) => {
+    const currentTranslateXValue = event.translationX + initialTranslateX.value;
+    const dismissThreshold = -itemWidth.value * resetThresholdArg;
+    if (currentTranslateXValue > dismissButtonThreshold.value / 2) {
+      resetPosition();
+    } else if (currentTranslateXValue > dismissThreshold) {
+      snapToDismissButton(dismissButtonThreshold.value);
+    } else {
+      dismissItem();
+    }
+  };
 
   const panGesture = Gesture.Pan()
     .runOnJS(true)
@@ -77,14 +76,12 @@ export const usePanGesture = (onRemove: () => void, dismissThresholdArg: number,
     .onStart(handleOnStart)
     .onUpdate(handleOnUpdate)
     .onEnd(handleOnEnd);
-
   return {
     panGesture,
-    translateDeleteButtonX,
+    translateDismissButtonX,
     itemHeight,
     itemWidth,
     itemOpacity: useSharedValue(1),
     currentTranslateX,
-    backgroundColor,
   };
 };

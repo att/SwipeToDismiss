@@ -2,35 +2,35 @@ import { PropsWithChildren, useState } from 'react';
 import { LayoutChangeEvent, Pressable, StyleSheet } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, { Easing, runOnJS, useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { DELETE_BUTTON_THRESHOLD, DISMISS_TRANSLATION_BREAKPOINT } from './swipeToDismiss.consts';
-import { usePanGesture } from './usePanGesture.hooks';
+import { RESET_THRESHOLD, DISMISS_THRESHOLD } from './swipeToDismiss.consts';
 import { TrashIcon } from './assets/svg/TrashIconSvg';
 import { SwipeToDismissProps } from './swipeToDismiss.types';
-
+import { usePanGesture } from './usePanGesture.hooks';
 
 export const SwipeToDismiss = (props: PropsWithChildren<SwipeToDismissProps>) => {
   const {
     children,
     onRemove,
-    dismissThresholdArg = DISMISS_TRANSLATION_BREAKPOINT,
-    deleteButtonThresholdArg = DELETE_BUTTON_THRESHOLD,
-    deleteContainerCustomStyles,
+    resetThresholdArg = RESET_THRESHOLD,
+    dismissThresholdArg = DISMISS_THRESHOLD,
+    dismissContainerCustomStyles,
   } = props;
   const [loaded, setLoaded] = useState(false);
-
-  const { panGesture, translateDeleteButtonX, itemHeight, itemWidth, itemOpacity, currentTranslateX, backgroundColor } = usePanGesture(
-    onRemove,
-    dismissThresholdArg,
-    deleteButtonThresholdArg,
-  );
+  const {
+    panGesture,
+    translateDismissButtonX,
+    itemHeight,
+    itemWidth,
+    itemOpacity,
+    currentTranslateX,
+  } = usePanGesture({ onRemove, resetThresholdArg, dismissThresholdArg });
 
   const animateCardStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: currentTranslateX.value }],
   }));
 
-  const animateDeleteButtonStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateDeleteButtonX.value }],
-    backgroundColor: backgroundColor.value,
+  const animateDismissButtonStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateDismissButtonX.value }],
   }));
 
   const animateItemHeight = useAnimatedStyle(() => ({
@@ -46,8 +46,8 @@ export const SwipeToDismiss = (props: PropsWithChildren<SwipeToDismissProps>) =>
     }
   };
 
-  const onDeleteButtonPress = () => {
-    itemOpacity.value = withTiming(0, { easing: Easing.out(Easing.ease) }, finished => {
+  const onTrashButtonPress = () => {
+    itemOpacity.value = withTiming(0, { easing: Easing.out(Easing.ease) }, (finished: boolean) => {
       itemHeight.value = withTiming(0, { easing: Easing.out(Easing.ease) }, () => {
         if (finished) {
           runOnJS(onRemove)();
@@ -59,8 +59,14 @@ export const SwipeToDismiss = (props: PropsWithChildren<SwipeToDismissProps>) =>
   return (
     <GestureDetector gesture={panGesture}>
       <Animated.View style={loaded ? animateItemHeight : { height: 'auto' }}>
-        <Animated.View style={[styles.deleteButtonContainer, deleteContainerCustomStyles, animateDeleteButtonStyle]}>
-          <Pressable onPress={onDeleteButtonPress} style={styles.deleteIcon}>
+        <Animated.View
+          style={[
+            styles.dismissButtonContainer,
+            dismissContainerCustomStyles,
+            animateDismissButtonStyle,
+          ]}
+        >
+          <Pressable onPress={onTrashButtonPress} style={styles.trashIcon}>
             {TrashIcon(styles.trashFill.color)}
           </Pressable>
         </Animated.View>
@@ -73,17 +79,17 @@ export const SwipeToDismiss = (props: PropsWithChildren<SwipeToDismissProps>) =>
 };
 
 const styles = StyleSheet.create({
-  deleteButtonContainer: {
+  dismissButtonContainer: {
     position: 'absolute',
     left: 0,
     right: 0,
     top: 0,
     bottom: 0,
-    backgroundColor: 'c70032',
+    backgroundColor: '#c70032',
     justifyContent: 'center',
     alignItems: 'flex-end',
   },
-  deleteIcon: {
+  trashIcon: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
